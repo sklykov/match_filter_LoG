@@ -1,0 +1,1 @@
+This project is intended for colleaction of Matlab scripts with generation of Gaussian-shape blobs and testing on them various spatial mask (as kernels for a convolution)
