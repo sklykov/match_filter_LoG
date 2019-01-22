@@ -25,6 +25,7 @@ classdef Picture < handle
     end
     
    %% assign (draw) a pixel value in a picture
+   % simply set a pixel value no more than 255 
    methods
        function [] = draw(Picture,i,j,val)
            size=Picture.s; % get the picture size
@@ -40,28 +41,46 @@ classdef Picture < handle
    end
    
    %% draw a single object with some shape
-   % drawing simple - object doens't touch the border
+   % simple drawing - object doens't touch the border
    methods
        function []=fuse(Picture,object_size,object_type,xC,yC)
-           [m,~]=size(Picture.I); % get the size of a row in picture
+           [m,~]=size(Picture.I); % get the size of a row in a picture
            if m>1 % check that background has been created before
                obj=FluObj(object_size,object_type); % sample of an object
-               if xC<obj.borddist 
-                   xC=obj.borddist+1; % guarantee that objects are away from border
-               elseif xC>Picture.s-obj.borddist
-                   xC=Picture.s-obj.borddist; % guarantee that objects are away from border
-               end
-               if yC<obj.borddist 
-                   yC=obj.borddist; % guarantee that objects are away from border
-               elseif yC>Picture.s-obj.borddist
-                   yC=Picture.s-obj.borddist-1; % guarantee that objects are away from border
-               end
-               minX=xC-obj.borddist; minY=yC-obj.borddist; % get the minimal values for object drawing
-               maxX=xC+obj.borddist; maxY=yC+obj.borddist; % get the maximal values for object drawing
-               for i=minX:1:maxX
-                   for j=minY:1:maxY
-                       Picture.draw(i,j,obj.gauss(xC,yC,i,j)); % assigning each pixel value
+               % the following long condition - for fuse a grid inside
+               % pictire with taking into account its borders
+               if ((xC>=obj.borddist)||(xC<=Picture.s-obj.borddist-1))&&((yC>=obj.borddist)||(yC<=Picture.s-obj.borddist-1))
+                   minX=xC-obj.borddist; minY=yC-obj.borddist; % get the minimal values for object drawing
+                   maxX=xC+obj.borddist; maxY=yC+obj.borddist; % get the maximal values for object drawing
+                   for i=minX:1:maxX
+                       for j=minY:1:maxY
+                           Picture.draw(i,j,obj.gauss(xC,yC,i,j)); % assigning each pixel value
+                       end
                    end
+               end
+           end
+       end
+   end
+   
+   %% draw a grid - collection of objects in different distances
+   % main parameter - distance between objects
+   methods
+       function []=grid(Picture,object_size,object_type,distance)
+           d=distance; % for a simplification
+           obj=FluObj(object_size,object_type); % sample of an object
+           [m,~]=size(Picture.I); % get the size of a row in a picture
+           l=m-2*obj.borddist; % available length to fit objects
+           N=1; % number of objects which can be drawn in a line
+           while (l-N*d)>0
+               N=N+1; % count the even number of objects fitted in a line
+           end
+           if (l-N*d)==0 
+               N=N+1; % additional case for symmetrical cases (picture, objects sizes)
+           end
+           for i=1:1:N
+               for j=1:1:N
+                   xC=(i-1)*d+obj.borddist+1; yC=(j-1)*d+obj.borddist+1; % get the objects centers
+                   Picture.fuse(obj.d,obj.shape,xC,yC); % draw each object
                end
            end
        end
