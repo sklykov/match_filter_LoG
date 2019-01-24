@@ -5,6 +5,7 @@ classdef Picture < handle
     properties
         s; % size of the picture (in pixels) 
         I; % picture itself - matrix with pixel values (square matrix)
+        FI; % container for a filtered image 
     end
     
     %% constructor
@@ -83,6 +84,23 @@ classdef Picture < handle
                    Picture.fuse(obj.d,obj.shape,xC,yC); % draw each object
                end
            end
+       end
+   end
+   
+   %% filter the image for noise suppresion 
+   methods
+       function []=convolfilt(Picture,SpatialMask)
+           % convolution the sample with the mask
+           Picture.I=cast(Picture.I,'double'); % additional conversion
+           Picture.FI=imfilter(Picture.I,SpatialMask.M,'replicate')/(SpatialMask.sum); % convolution 
+           % conversion of the filtered image adn additional operations
+           if SpatialMask.type == 'Gauss'
+               double minFI; minFI = min(min(Picture.FI)); % get the minimal pixel value
+               Picture.FI=Picture.FI-minFI; % substracting minimal values
+           end
+           double maxFI; maxFI = max(max(Picture.FI)); % get the max pixel value
+           Picture.FI=Picture.FI*(255/maxFI); % making U8 calibration
+           Picture.FI=cast(Picture.FI,'uint8'); % transform to the U8 image type
        end
    end
 end
