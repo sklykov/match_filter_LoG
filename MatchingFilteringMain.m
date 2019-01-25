@@ -23,9 +23,18 @@ figure; imshow(p.I); % show the noisy picture
 
 %% convolution of a generated grid or open image with a mask
 % im=imread('sample.png');
-mask=SpatialMask(mask_size,'Gauss'); % sample of a filtering mask
+mask=SpatialMask(mask_size,'G'); % sample of a filtering mask (Gaussian), 'G' - for a Gaussian kernel 
 p.convolfilt(mask); % noise supression using generated mask
 double maxG; maxG=max(max(mask.M)); mask.M=mask.M*(255/maxG); % making a mask U8 picture
 mask.M=cast(mask.M,'uint8'); figure; imshow(mask.M); % check the mask appearance
 figure; imshow(p.FI); % check the mask appearance
+mask2=SpatialMask(mask_size,'L'); % sample of a filtering mask (LoG), 'L' - for a LoG kernel
+p.convolfilt(mask2,'p'); % noise supression using generated mask; 'p' - for retaining negative pixel values
+figure; imshow(p.FI); % check the mask appearance
+p.convolfilt(mask2); % noise supression using generated mask; nothing - show only positive pixel values
+figure; imshow(p.FI); % check the mask appearance
+mask2.showLoG('p'); % generate a LoG mask with positive values 
+figure; imshow(mask2.MLoGC); % show positive values of a LoG mask
+mask2.showLoG('n'); % generate a LoG mask as negative
+figure; imshow(mask2.MLoGC); % show positive values of a LoG mask
 % imwrite(p.FI, 'filtered.png'); % save the filtered picture

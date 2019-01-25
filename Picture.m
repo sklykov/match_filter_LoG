@@ -89,14 +89,24 @@ classdef Picture < handle
    
    %% filter the image for noise suppresion 
    methods
-       function []=convolfilt(Picture,SpatialMask)
+       function []=convolfilt(Picture,SpatialMask,varargin)
            % convolution the sample with the mask
            Picture.I=cast(Picture.I,'double'); % additional conversion
            Picture.FI=imfilter(Picture.I,SpatialMask.M,'replicate')/(SpatialMask.sum); % convolution 
            % conversion of the filtered image adn additional operations
-           if SpatialMask.type == 'Gauss'
+           if SpatialMask.type == 'G'
                double minFI; minFI = min(min(Picture.FI)); % get the minimal pixel value
-               Picture.FI=Picture.FI-minFI; % substracting minimal values
+               Picture.FI=Picture.FI-minFI; % substracting minimal value
+           elseif SpatialMask.type == 'L'
+               if size(varargin)>0
+                   if isa(varargin{1},'char')
+                       double minFI; minFI = min(min(Picture.FI)); % get the minimal pixel value
+                       % save all values after convolution, even negative ones
+                       if (varargin{1} == 'p')&&(minFI<0 )
+                           Picture.FI=Picture.FI-minFI; % substracting minimal value    
+                       end
+                   end
+               end
            end
            double maxFI; maxFI = max(max(Picture.FI)); % get the max pixel value
            Picture.FI=Picture.FI*(255/maxFI); % making U8 calibration

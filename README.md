@@ -1,1 +1,2 @@
-This project is intended for colleaction of Matlab scripts with generation of Gaussian-shape blobs and testing on them various spatial mask (as kernels for a convolution)
+This project is intended for colleaction of the Matlab scripts relate to a generation of Gaussian-shape objects and testing on them various spatial masks (as kernels for a convolution).
+It is part of an evaluation of a LoG matched filtering capabilites.
